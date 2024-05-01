@@ -73,7 +73,7 @@ La valeur "x" correspond au numéro de votre TD. Nous utiliserons ici <span styl
 Redémarrez pour appliquez les changements.
 Nous allons maintenant créer notre contrôleur de domaine.
 
-###### Installation du Rôle DNS & ADDS
+#### Installation du Rôle DNS & ADDS
 
 Pour installer un contrôleur de domaine, deux rôles sont indispensables : Le rôle DNS et ADDS.
 
@@ -156,7 +156,7 @@ Le serveur a redémarré, et on voit déjà la différence, vous êtes maintenan
 
 Vous avez créé un contrôleur de domaine, vous pouvez maintenant créer vos OU, utilisateurs et faire joindre vos PCs au domaine.
 
-###### Installation du disque dur et du pilote virtio-win
+#### Installation du disque dur et du pilote virtio-win
 
 Pour optimiser les performances de notre serveur, nous allons installer un disque dur supplémentaire et le pilote virtio-win. Le pilote virtio-win améliore les performances de l'entrée/sortie du disque dur et du réseau dans les machines virtuelles.
 
@@ -332,6 +332,8 @@ Selectionner `Ajouter` et entrez `Jury` par exemple.
 
 ![alt text](IMG/image-47.png)
 
+<div align="center">
+
 Créer tous les utilisateurs suivants :
 | Utilisateur     | Groupes                            | Horaires                       |
 |-----------------|------------------------------------|--------------------------------|
@@ -350,6 +352,8 @@ Créer tous les utilisateurs suivants :
 | prof_utc-comp   | profs_ecoles, utc-comp             | du jeudi au samedi de 6h00 à 23h00 |
 | utc-comp_et1    | utc-comp                           | vendredi 7h00-23h00, samedi 7h00-18h00 |
 | utc-comp_et2    | utc-comp                           | vendredi 7h00-23h00, samedi 7h00-18h00 |
+
+</div>
 
 Voici un script qui vous permettra de créer tous les utilisateurs :
 
