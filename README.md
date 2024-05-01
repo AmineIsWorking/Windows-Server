@@ -9,6 +9,7 @@ Dans le cadre de ce TP, nous avons mis en pratique les éléments de théorie vu
 - [Création et administration des comptes](#création-et-administration-des-comptes)
 - [Sécurisation des données](#sécurisation-des-données)
 - [Script de connexion/login](#script-de-connexionlogin)
+- [Création de la machine cliente](création-de-la-machine-cliente)
 
 ## Préparation des machines virtuelles de la maquette
 
