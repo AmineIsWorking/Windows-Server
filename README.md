@@ -270,6 +270,8 @@ Vous devez obtenir quelque chose comme ça :
 
 2. Créer les différents groupes d'utilisateurs suivants :
 
+<div align="center">
+
 | Nom Groupe     | Description                                       |
 |----------------|---------------------------------------------------|
 | jury           | Membres du jury                                   |
@@ -278,6 +280,8 @@ Vous devez obtenir quelque chose comme ça :
 | insa-lyon      | Professeurs et étudiants de l’INSA de Lyon        |
 | supelec-paris  | Professeurs et étudiants de CentraleSupélec Paris-Saclay |
 | utc-comp       | Professeurs et étudiants de l’UTC de Compiègne    |
+
+</div>
 
 Pour cela, créer un nouvel objet Groupe (ici nous allons prendre le cas de Jury) :  
 
@@ -430,6 +434,7 @@ Vous devez au moins faire manuellement `prof_jury2` et `insa-cvl_et1`.
 7. Nous allons maintenant définir le profil d’environnement de l’utilisateur. Pour cela, Partageons les répertoires suivants :
 
 <div align="center">
+    
 | Répertoire      | Nom de partage   |
 |-----------------|------------------|
 | profiles        | profiles$        |
@@ -439,6 +444,7 @@ Vous devez au moins faire manuellement `prof_jury2` et `insa-cvl_et1`.
 | insa-lyon       | insa-lyon$       |
 | supelec-paris   | supelec-paris$   |
 | utc-comp        | utc-comp$        |
+
 </div>
 
 Prenons un exemple :
