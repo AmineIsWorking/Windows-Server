@@ -70,7 +70,7 @@ La valeur "x" correspond au numéro de votre TD. Nous utiliserons ici <span styl
 
 ![alt text](IMG/image-11.png)  
 
-Redémarrez pour appliquez les changements.
+Redémarrez pour appliquer les changements.
 Nous allons maintenant créer notre contrôleur de domaine.
 
 #### Installation du Rôle DNS & ADDS
@@ -105,7 +105,7 @@ Des fonctionnalités supplémentaires sont automatiquement sélectionnées pour 
 
 L’installation des rôles et fonctionnalités vont se lancer… Cela prendra quelques minutes. Vous pouvez fermer la fenêtre en cliquant sur ``Fermer``.
 
-7. Revenez maintenant sur le Dashboard du Server Manager, vous devriez y trouver une petite alerte (Si elle n'apparaît pas, cliquer sur le symbole de rafraîchsissement juste à côté.).
+7. Revenez maintenant sur le Dashboard du Server Manager, vous devriez y trouver une petite alerte (Si elle n'apparaît pas, cliquer sur le symbole de rafraîchissement juste à côté.).
 Cliquez dessus, puis cliquez sur « Promouvoir ce serveur en contrôleur de domaine ».  
 
 ![alt text](IMG/image-18.png)
@@ -207,7 +207,7 @@ Vous devez obtenir quelque chose de similaire :
 
 ![alt text](IMG/image-35.png)
 
-Nous pouvons dés à présent créer les dossier pour nos utilisateurs. Voici l'arborescence du serveur que vous devais construire.
+Nous pouvons dès à présent créer les dossiers pour nos utilisateurs. Voici l'arborescence du serveur que vous devais construire.
 <p align="center">
     <img src="IMG/image-37.png">
 </p>
@@ -250,7 +250,7 @@ New-Item -ItemType Directory -Path "I:\utc-comp\utc-comp_et2"
 
 ## Création et administration des comptes
 
-Nous allons maintenant créer notre utilisateurs et leur déterminé certains paramètres.
+Nous allons maintenant créer nos utilisateurs et leur déterminé certains paramètres.
 Pour cela :
 
 1. Créer 2 unités d’organisation (Ecoles et Jury) dans le domaine racine.  
@@ -287,7 +287,7 @@ Pour cela, créer un nouvel objet Groupe (ici nous allons prendre le cas de Jury
 
 ![alt text](IMG/image-41.png)  
 
-Adressez lui un nom de groupe, un étendue globale du groupe de type sécurité.  
+Adressez-lui un nom de groupe, une étendue globale du groupe de type sécurité.  
 
 Vous pouvez créer vos groupes à l'aide de ce script :
 ```powershell
@@ -301,7 +301,7 @@ New-ADGroup -Name "utc-comp" -GroupScope Global -Description "Professeurs et ét
 
 Nous allons à présent créer des utilisateurs. Dans notre cas, nous souhaitons qu'ils n'aient pas de mot de passe. Nous allons désactiver la saisie obligatoire de mot de passe.
 
-<strong><span style="color:black;text-decoration:underline;">Remarque</span></strong><span style="color:black;text-decoration:underline;"> : cela ne doit jamais être appliqué dans un contexte d’entreprise !</span>.
+<strong><span style="color:black;text-decoration:underline;">Remarque</span></strong><span style="color:black;text-decoration:underline;"> : cela ne doit jamais être appliqué dans un contexte d’entreprise !</span>
 
 Pour désactiver la saisie de mot de passe, rendez-vous dans Exécuter et saisissez  « gpmc.msc ».
 Dans le gestionnaire de stratégie de groupe, rendez-vous dans ``Domaines``>`cfr-NomLogin.fr`>``Objets de stratégie de groupe``>``Default Domain Policy`` et cliquez sur ``Modifier``.  
@@ -316,19 +316,19 @@ Mettons à jour les stratégies avec : ``gpupdate /force`` dans powershell.
 
 ![alt text](IMG/image-44.png)
 
-3. Créer un nouvel objet de type Utilisateurs (ici nous prenons l'exemple de ``prof_jury1``). Adressez lui un Nom et un Nom d'ouverture de session de l'utilisateur.  
+3. Créer un nouvel objet de type Utilisateurs (ici nous prenons l'exemple de ``prof_jury1``). Adressez-lui un Nom et un Nom d'ouverture de session de l'utilisateur.  
 
 ![alt text](IMG/image-45.png)
 
-4. Ne mettez aucun mot de passe et selectionner "le mot de passe n'expire jamais".
+4. Ne mettez aucun mot de passe et sélectionner "le mot de passe n'expire jamais".
 
-<strong><span style="color:black;text-decoration:underline;">Rappel</span></strong><span style="color:black;text-decoration:underline;"> : cela ne doit jamais être appliqué dans un contexte d’entreprise !</span>.
+<strong><span style="color:black;text-decoration:underline;">Rappel</span></strong><span style="color:black;text-decoration:underline;"> : cela ne doit jamais être appliqué dans un contexte d’entreprise !</span>
 
 5. L'utilisateur `prof_jury1` a été créer. Maintenant, ajoutons le dans le groupe Administrateur et Jury. Pour cela, rendez-vous dans ``Propriétés``>``Membre de``.  
 
 ![alt text](IMG/image-46.png)  
 
-Selectionner `Ajouter` et entrez `Jury` par exemple.  
+Sélectionner `Ajouter` et entrez `Jury` par exemple.  
 
 ![alt text](IMG/image-47.png)
 
@@ -410,7 +410,7 @@ Vous devez obtenir quelque chose comme cela :
 ![alt text](IMG/image-49.png)
 
 6. Vous remarquez que `prof_jury1` n'a aucune limitation contrairement à `prof_jury2`. Regardons comment imposer un horaire à un utilisateur.
-Rendez-vous dans `Propriétés`>`Compte`>`Horaire d'accés` et indiquez les horaires souhaitez.  
+Rendez-vous dans `Propriétés`>`Compte`>`Horaire d'accès` et indiquez les horaires souhaitez.  
 
 ![alt text](IMG/image-48.png)
 
@@ -452,10 +452,10 @@ Vous devez au moins faire manuellement `prof_jury2` et `insa-cvl_et1`.
 </div>
 
 Prenons un exemple :
-Nous souhaitons partager le repertoire jury. Clic droit sur le repertoire puis `Propriétés`>`Partage`>`Partage avancé`.  
+Nous souhaitons partager le répertoire jury. Clic droit sur le répertoire puis `Propriétés`>`Partage`>`Partage avancé`.  
 
 ![alt text](IMG/image-51.png)
-Partager le dossier et adressez lui son nom de partage. Vous pouvez également limiter le nombre d'utilisateurs simultanés.  
+Partager le dossier et adressez-lui son nom de partage. Vous pouvez également limiter le nombre d'utilisateurs simultanés.  
 
 Allons dans ``Autorisations`` et ajoutons le groupe `jury`.  
 
@@ -492,7 +492,7 @@ net share utc-comp_et2$=I:\utc-comp\utc-comp_et2 /grant:utc-comp_et2,READ /grant
 ```
 
 8. Pour chaque utilisateur, nous devons définir le chemin du profil.
-Rendez-vous dans `Propriétés`>`Profil` et dans la section `Chemin du profil`, inserez le profil suivant : à `\\SRV-2K22-NomLogin\profiles$\%USERNAME%.`
+Rendez-vous dans `Propriétés`>`Profil` et dans la section `Chemin du profil`, insérez le profil suivant : à `\\SRV-2K22-NomLogin\profiles$\%USERNAME%.`
 
 `%USERNAME%` est une variable qui sera remplacé par le nom de l'utilisateur.
 
@@ -518,11 +518,11 @@ Set-ADUser -Identity utc-comp_et1 -ProfilePath "$serverPath\profiles$\utc-comp_e
 Set-ADUser -Identity utc-comp_et2 -ProfilePath "$serverPath\profiles$\utc-comp_et2"
 ```
 
-9. Adressez également un dossier de base à chaque utilisateur. Dans notre exemple `prof_jury1`, choissiez la section `Connecter` à la lettre de montage K par exemple à `\\SRV-2K22-NomLogin\jury$\%USERNAME%.`  
+9. Adressez également un dossier de base à chaque utilisateur. Dans notre exemple `prof_jury1`, choisissez la section `Connecter` à la lettre de montage K par exemple à `\\SRV-2K22-NomLogin\jury$\%USERNAME%.`  
 
 ![alt text](IMG/image-54.png)
 
-Voici les repertoires de bases qui doivent être associés à chaque utilisateurs :
+Voici les répertoires de bases qui doivent être associés à chaque utilisateur :
 
 | Utilisateur       | Répertoire de base                           |
 |-------------------|----------------------------------------------|
@@ -562,25 +562,25 @@ net user supelec-paris_et2 /homedir:$serverPath\supelec-paris$\supelec-paris_et2
 net user utc-comp_et1 /homedir:$serverPath\utc-comp$\utc-comp_et1
 net user utc-comp_et2 /homedir:$serverPath\utc-comp$\utc-comp_et2
 ```
-<strong>Attention !</strong> Ce script écrira dans le ``Chemin d'accés local``. Il ne vous permet que d'avoir la chaîne de caractère juste à vos côtés pour la mettre dans la bonne section.
+<strong>Attention !</strong> Ce script écrira dans le ``Chemin d'accès local``. Il ne vous permet que d'avoir la chaîne de caractère juste à vos côtés pour la mettre dans la bonne section.
 
 ## Sécurisation des données
 Nous avons enfin fini de configurer ces utilisateurs et maintenant nous devons les sécurisés.
 Par défaut, les dossiers ou les fichiers ont droits d’accès. Garder les droits ``CREATEUR PROPRIETAIRE``
 et ``Système`` par défaut et supprimer les autres.
 
-1. Sécurisons le repertoire Jury. Seul les groupes Administrateurs et jury doivent avoir des droits de `Contrôle total` et de ``Lire et exécuter`` respectivement. Rendez-vous sur le repertoire `Jury` et cliquez sur ``Propriétés``>``Partage``>``Modifier``.
-Ajouter le groupe ``Jury`` et donnez lui les droits de ``Lire et exécuter``. Donnez également les droits de `Contrôle total` à l'Administrateur si ce n'est pas déjà fait. Vous devez avoir quelque chose qui ressemble à ceci :  
+1. Sécurisons le répertoire Jury. Seul les groupes Administrateurs et jury doivent avoir des droits de `Contrôle total` et de ``Lire et exécuter`` respectivement. Rendez-vous sur le répertoire `Jury` et cliquez sur ``Propriétés``>``Partage``>``Modifier``.
+Ajouter le groupe ``Jury`` et donnez-lui les droits de ``Lire et exécuter``. Donnez également les droits de `Contrôle total` à l'Administrateur si ce n'est pas déjà fait. Vous devez avoir quelque chose qui ressemble à ceci :  
 
 ![alt text](IMG/image-55.png)
 
-Et voilà ! Vous avez sécuriser le repertoire. 
+Et voilà ! Vous avez sécurisé le répertoire. 
 
-<strong>Attention !</strong> Certains sous-dossier que vous partagez heritent des autorisations de leurs parents ! Vous pouvez avoir ce genre d'erreur :  
+<strong>Attention !</strong> Certains sous-dossiers que vous partagez héritent des autorisations de leurs parents ! Vous pouvez avoir ce genre d'erreur :  
 
 ![alt text](IMG/image-56.png)
 
-Pour pouvoir modifier les autorisations du repertoire, revenez à l'onglet `Sécurité` des `Prpriétés` de votre repertoire et aller dans `Avancé`. Vous allez pouvoir désactiver l'heritage :  
+Pour pouvoir modifier les autorisations du répertoire, revenez à l'onglet `Sécurité` des `Propriétés` de votre répertoire et aller dans `Avancé`. Vous allez pouvoir désactiver l'héritage :  
 
 ![alt text](IMG/image-57.png)
 
@@ -588,7 +588,7 @@ Pour pouvoir modifier les autorisations du repertoire, revenez à l'onglet `Séc
 
 ![alt text](IMG/image-58.png)
 
-Très bien. Vous avez tous les outils pour faire la suite. Faites de mêmes pour les autres repertoires suivants :
+Très bien. Vous avez tous les outils pour faire la suite. Faites de mêmes pour les autres répertoires suivants :
 
 | Partition ou Répertoire | Utilisateurs | Droits d'accès NTFS | Groupe utilisateurs | Droits d'accès NTFS |
 |-------------------------|--------------|---------------------|---------------------|---------------------|
@@ -606,9 +606,9 @@ Très bien. Vous avez tous les outils pour faire la suite. Faites de mêmes pour
 | insa-cvl_et1            | insa-cvl_et1 | Modifier            | Administrateurs prof_insa-cvl | Contrôle total Modifier |
 | insa-cvl et2            | insa-cvl_et2 | Modifier            | Administrateurs prof_insa-cvl | Contrôle total Modifier |
 
-Et quand vous aurez fini, faites de même en appliquants les droits d’accès NTFS aux répertoires des autres écoles en se basant sur le modèle de l’école INSA-CVL :)
+Et quand vous aurez fini, faites de même en appliquant les droits d’accès NTFS aux répertoires des autres écoles en se basant sur le modèle de l’école INSA-CVL :)
 
-Ca en fait des choses à configurer... Voici votre cadeau surprise :) :
+Ça en fait des choses à configurer... Voici votre cadeau surprise :) :
 
 ```powershell
 # Liste des chemins de fichiers
@@ -888,7 +888,7 @@ Voici l'allure du script jury.bat :
 
 ![alt text](IMG/image-59.png)
 
-Ces derniers seront sauvegarder dans le chemin suivant :
+Ces derniers seront sauvegardés dans le chemin suivant :
 `C:\Windows\SYSVOL\sysvol\scripts`
 
 Vous devez obtenir les scripts suivants :  
@@ -1026,7 +1026,7 @@ La distribution des scripts doit être effectuée en fonction des utilisateurs e
 
 Cela garantit que chaque utilisateur reçoit le script approprié en fonction de son rôle et de son groupe.
 
-Il y a pas de petites économies de temps, voici votre du :
+Il n'y a pas de petites économies de temps, voici votre dû :
 
 ```powershell
 $scriptPath = "C:\Windows\SYSVOL\sysvol\scripts\"
@@ -1107,7 +1107,7 @@ L'adresse DNS sera celle de notre serveur `192.168.x.10`.
 
 ![alt text](IMG/image-70.png)
 
-12. Modifier le nom de l'ordinateur par `W10-NomLogin` et selectionner `Domaine` dans la rubrique `Membre d'un`.
+12. Modifier le nom de l'ordinateur par `W10-NomLogin` et sélectionner `Domaine` dans la rubrique `Membre d'un`.
 Saisissez le nom de notre serveur : `cfr-NomLogin`.
 <strong>Attention !</strong> N'ajoutez pas le `.fr`!
 Enfin saisissez le login `Administrateur` et le mot de passe `Azerty18`.  
@@ -1123,11 +1123,11 @@ Et la machine redémarre.
 
 ![alt text](IMG/image-73.png)
 
-15. Depuis l'explorateur de fichier, vous pouvez voir votre repertoire associer `prof_jury1` et le dossier `commun`. Créer un fichier test dans le repertoire `prof_jury1`.  
+15. Depuis l'explorateur de fichier, vous pouvez voir votre répertoire associer `prof_jury1` et le dossier `commun`. Créer un fichier test dans le répertoire `prof_jury1`.  
 
 ![alt text](IMG/image-74.png)
 
-16. Revenez sur votre machine serveur et allez voir dans le repertoire `prof_jury1`. Qu'est-ce que vous constatez ? Le dossier test est présent !  
+16. Revenez sur votre machine serveur et allez voir dans le répertoire `prof_jury1`. Qu'est-ce que vous constatez ? Le dossier test est présent !  
 
 ![alt text](IMG/image-75.png)
 
