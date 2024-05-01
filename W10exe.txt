@@ -1,0 +1,557 @@
+New-Item -ItemType Directory -Path "F:\profiles"
+New-Item -ItemType Directory -Path "H:\commun"
+New-Item -ItemType Directory -Path "H:\prof_jury1"
+New-Item -ItemType Directory -Path "H:\prof_jury2"
+New-Item -ItemType Directory -Path "H:\prof_jury3"
+New-Item -ItemType Directory -Path "I:\insa-cvl"
+New-Item -ItemType Directory -Path "I:\insa-lyon"
+New-Item -ItemType Directory -Path "I:\profs_ecoles"
+New-Item -ItemType Directory -Path "I:\profs_ecoles\commun"
+New-Item -ItemType Directory -Path "I:\profs_ecoles\prof_insa-cvl"
+New-Item -ItemType Directory -Path "I:\profs_ecoles\prof_insa-lyon"
+New-Item -ItemType Directory -Path "I:\profs_ecoles\prof_insa-supelec-paris"
+New-Item -ItemType Directory -Path "I:\profs_ecoles\prof_utc-comp"
+New-Item -ItemType Directory -Path "I:\supelec-paris"
+New-Item -ItemType Directory -Path "I:\utc-comp"
+New-Item -ItemType Directory -Path "I:\insa-cvl\commun"
+New-Item -ItemType Directory -Path "I:\insa-cvl\insa-cvl_et1"
+New-Item -ItemType Directory -Path "I:\insa-cvl\insa-cvl_et2"
+New-Item -ItemType Directory -Path "I:\insa-lyon\commun"
+New-Item -ItemType Directory -Path "I:\insa-lyon\insa-lyon_et1"
+New-Item -ItemType Directory -Path "I:\insa-lyon\insa-lyon_et2"
+New-Item -ItemType Directory -Path "I:\supelec-paris\commun"
+New-Item -ItemType Directory -Path "I:\supelec-paris\supelec-paris_et1"
+New-Item -ItemType Directory -Path "I:\supelec-paris\supelec-paris_et2"
+New-Item -ItemType Directory -Path "I:\utc-comp\commun"
+New-Item -ItemType Directory -Path "I:\utc-comp\utc-comp_et1"
+New-Item -ItemType Directory -Path "I:\utc-comp\utc-comp_et2"
+
+# Création des unités d'organisation (OU)
+$nameserve="ABOUFTIL"
+New-ADOrganizationalUnit -Name "Ecoles" -Path "DC=cfr-$nameserve,DC=fr"
+New-ADOrganizationalUnit -Name "Jury" -Path "DC=cfr-$nameserve,DC=fr"
+
+# Création des groupes globaux
+New-ADGroup -Name "jury" -GroupScope Global -Description "Membres du jury" -Path "OU=Jury,DC=cfr-$nameserve,DC=fr"
+New-ADGroup -Name "profs_ecoles" -GroupScope Global -Description "Professeurs des écoles" -Path "OU=Ecoles,DC=cfr-$nameserve,DC=fr"
+New-ADGroup -Name "insa-cvl" -GroupScope Global -Description "Professeurs et étudiants de l’INSA-CVL" -Path "OU=Ecoles,DC=cfr-$nameserve,DC=fr"
+New-ADGroup -Name "insa-lyon" -GroupScope Global -Description "Professeurs et étudiants de l’INSA de Lyon" -Path "OU=Ecoles,DC=cfr-$nameserve,DC=fr"
+New-ADGroup -Name "supelec-paris" -GroupScope Global -Description "Professeurs et étudiants de CentraleSupélec Paris-Saclay" -Path "OU=Ecoles,DC=cfr-$nameserve,DC=fr"
+New-ADGroup -Name "utc-comp" -GroupScope Global -Description "Professeurs et étudiants de l’UTC de Compiègne" -Path "OU=Ecoles,DC=cfr-$nameserve,DC=fr"
+
+gpupdate /force
+
+# Création des utilisateurs
+$utilisateurs = @(
+    @{ Nom = "prof_jury1"; Groupes = "Administrateurs,jury" },
+    @{ Nom = "prof_jury2"; Groupes = "Opérateurs de serveur,jury" },
+    @{ Nom = "prof_jury3"; Groupes = "jury" },
+    @{ Nom = "prof_insa-cvl"; Groupes = "profs_ecoles,insa-cvl" },
+    @{ Nom = "insa-cvl_et1"; Groupes = "insa-cvl" },
+    @{ Nom = "insa-cvl_et2"; Groupes = "insa-cvl" },
+    @{ Nom = "prof_insa-lyon"; Groupes = "profs_ecoles,insa-lyon" },
+    @{ Nom = "insa-lyon_et1"; Groupes = "insa-lyon" },
+    @{ Nom = "insa-lyon_et2"; Groupes = "insa-lyon" },
+    @{ Nom = "prof_supelec-paris"; Groupes = "profs_ecoles,supelec-paris" },
+    @{ Nom = "supelec-paris_et1"; Groupes = "supelec-paris" },
+    @{ Nom = "supelec-paris_et2"; Groupes = "supelec-paris" },
+    @{ Nom = "prof_utc-comp"; Groupes = "profs_ecoles,utc-comp" },
+    @{ Nom = "utc-comp_et1"; Groupes = "utc-comp" },
+    @{ Nom = "utc-comp_et2"; Groupes = "utc-comp" }
+)
+
+
+foreach ($utilisateur in $utilisateurs) {
+    try {
+        $path = if ($utilisateur.Groupes -like "*jury*") {
+            "OU=Jury,DC=cfr-$nameserve,DC=fr"
+        } else {
+            "OU=Ecoles,DC=cfr-$nameserve,DC=fr"
+        }
+
+        # Créer l'utilisateur avec les paramètres spécifiques
+        New-ADUser -Name $utilisateur.Nom -Path $path -UserPrincipalName "$($utilisateur.Nom)@cfr-$nameserve.fr" -GivenName $utilisateur.Nom -Surname $utilisateur.Nom -SamAccountName $utilisateur.Nom -DisplayName $utilisateur.Nom -Enabled $true -PasswordNeverExpires $true -ErrorAction Stop
+
+        # Ajouter l'utilisateur à chaque groupe
+        $groupes = $utilisateur.Groupes -split ","
+        foreach ($groupe in $groupes) {
+            # Vérifier si le groupe est un groupe intégré
+            if ($groupe.Trim() -in @("Opérateurs de serveur", "Opérateurs de sauvegarde", "Administrateurs")) {
+                Add-ADGroupMember -Identity "CN=$groupe, CN=Builtin, DC=cfr-$nameserve,DC=fr" -Members $utilisateur.Nom -ErrorAction Stop
+            } else {
+                Add-ADGroupMember -Identity $groupe.Trim() -Members $utilisateur.Nom -ErrorAction Stop
+            }
+        }
+    } catch {
+        Write-Error "Une erreur s'est produite lors de la création de l'utilisateur ou de l'ajout de l'utilisateur au groupe : $_"
+    }
+}
+
+#Montrer qu'on s'est faire avec les screens d'Options d'impressions et de sauvegarde
+
+#Montrer qu'on s'est faire pour prof_jury2 et insa-cvl_et1
+
+$log = (Get-ADUser -Identity prof_jury2 -Properties logonHours).logonHours
+Set-ADUser -Identity prof_jury3 -Replace @{logonHours = $log} 
+Set-ADUser -Identity prof_insa-cvl -Replace @{logonHours = $log}
+Set-ADUser -Identity prof_insa-lyon -Replace @{logonHours = $log}
+Set-ADUser -Identity prof_supelec-paris -Replace @{logonHours = $log}
+Set-ADUser -Identity prof_utc-comp -Replace @{logonHours = $log}
+
+$log = (Get-ADUser -Identity insa-cvl_et1 -Properties logonHours).logonHours
+Set-ADUser -Identity insa-cvl_et2 -Replace @{logonHours = $log}
+Set-ADUser -Identity insa-lyon_et1 -Replace @{logonHours = $log}
+Set-ADUser -Identity insa-lyon_et2 -Replace @{logonHours = $log}
+Set-ADUser -Identity supelec-paris_et1 -Replace @{logonHours = $log}
+Set-ADUser -Identity supelec-paris_et2 -Replace @{logonHours = $log}
+Set-ADUser -Identity utc-comp_et1 -Replace @{logonHours = $log}
+Set-ADUser -Identity utc-comp_et2 -Replace @{logonHours = $log}
+
+
+
+net share jury$=H:\ /grant:jury,READ /grant:jury,CHANGE /users:5
+net share profiles$=F:\profiles /users:5
+net share profs_ecoles$=I:\profs_ecoles /grant:profs_ecoles,READ /grant:profs_ecoles,CHANGE /users:5
+net share insa-cvl$=I:\insa-cvl /grant:insa-cvl,READ /grant:insa-cvl,CHANGE /users:5
+net share insa-lyon$=I:\insa-lyon /grant:insa-lyon,READ /grant:insa-lyon,CHANGE /users:5
+net share supelec-paris$=I:\supelec-paris /grant:supelec-paris,READ /grant:supelec-paris,CHANGE /users:5
+net share utc-comp$=I:\utc-comp /grant:utc-comp,READ /grant:utc-comp,CHANGE /users:5
+net share commun_jury$=H:\commun /grant:jury,READ /grant:jury,CHANGE /users:5
+net share commun_insa-cvl$=I:\insa-cvl\commun /grant:insa-cvl,READ /grant:insa-cvl,CHANGE /users:5
+net share commun_insa-lyon$=I:\insa-lyon\commun /grant:insa-lyon,READ /grant:insa-lyon,CHANGE /users:5
+net share commun_supelec-paris$=I:\supelec-paris\commun /grant:supelec-paris,READ /grant:supelec-paris,CHANGE /users:5
+net share commun_utc-comp$=I:\utc-comp\commun /grant:utc-comp,READ /grant:utc-comp,CHANGE /users:5
+net share commun_profs_ecoles$=I:\profs_ecoles\commun /grant:profs_ecoles,READ /grant:profs_ecoles,CHANGE /users:5
+net share prof_jury1$=H:\prof_jury1 /grant:prof_jury1,READ /grant:prof_jury1,CHANGE /users:1
+net share prof_jury2$=H:\prof_jury2 /grant:prof_jury2,READ /grant:prof_jury2,CHANGE /users:1
+net share prof_jury3$=H:\prof_jury3 /grant:prof_jury3,READ /grant:prof_jury3,CHANGE /users:1
+net share prof_insa-cvl$=I:\profs_ecoles\prof_insa-cvl /grant:prof_insa-cvl,READ /grant:prof_insa-cvl,CHANGE /users:1
+net share insa-cvl_et1$=I:\insa-cvl\insa-cvl_et1 /grant:insa-cvl_et1,READ /grant:insa-cvl_et1,CHANGE /users:1
+net share insa-cvl_et2$=I:\insa-cvl\insa-cvl_et2 /grant:insa-cvl_et2,READ /grant:insa-cvl_et2,CHANGE /users:1
+net share insa-lyon_et1$=I:\insa-lyon\insa-lyon_et1 /grant:insa-lyon_et1,READ /grant:insa-lyon_et1,CHANGE /users:1
+net share insa-lyon_et2$=I:\insa-lyon\insa-lyon_et2 /grant:insa-lyon_et2,READ /grant:insa-lyon_et2,CHANGE /users:1
+net share supelec-paris_et1$=I:\supelec-paris\supelec-paris_et1 /grant:supelec-paris_et1,READ /grant:supelec-paris_et1,CHANGE /users:1
+net share supelec-paris_et2$=I:\supelec-paris\supelec-paris_et2 /grant:supelec-paris_et2,READ /grant:supelec-paris_et2,CHANGE /users:1
+net share utc-comp_et1$=I:\utc-comp\utc-comp_et1 /grant:utc-comp_et1,READ /grant:utc-comp_et1,CHANGE /users:1
+net share utc-comp_et2$=I:\utc-comp\utc-comp_et2 /grant:utc-comp_et2,READ /grant:utc-comp_et2,CHANGE /users:1
+
+#Modifier la valeur de servePath
+$serverPath = "\\SRV-2K22-ABOUFTIL"
+
+Set-ADUser -Identity prof_jury1 -ProfilePath "$serverPath\profiles$\prof_jury1"
+Set-ADUser -Identity prof_jury2 -ProfilePath "$serverPath\profiles$\prof_jury2"
+Set-ADUser -Identity prof_insa-cvl -ProfilePath "$serverPath\profiles$\prof_insa-cvl"
+Set-ADUser -Identity prof_insa-lyon -ProfilePath "$serverPath\profiles$\prof_insa-lyon"
+Set-ADUser -Identity prof_supelec-paris -ProfilePath "$serverPath\profiles$\prof_supelec-paris"
+Set-ADUser -Identity prof_utc-comp -ProfilePath "$serverPath\profiles$\prof_utc-comp"
+Set-ADUser -Identity insa-cvl_et2 -ProfilePath "$serverPath\profiles$\insa-cvl_et2"
+Set-ADUser -Identity insa-lyon_et1 -ProfilePath "$serverPath\profiles$\insa-lyon_et1"
+Set-ADUser -Identity insa-lyon_et2 -ProfilePath "$serverPath\profiles$\insa-lyon_et2"
+Set-ADUser -Identity supelec-paris_et1 -ProfilePath "$serverPath\profiles$\supelec-paris_et1"
+Set-ADUser -Identity supelec-paris_et2 -ProfilePath "$serverPath\profiles$\supelec-paris_et2"
+Set-ADUser -Identity utc-comp_et1 -ProfilePath "$serverPath\profiles$\utc-comp_et1"
+Set-ADUser -Identity utc-comp_et2 -ProfilePath "$serverPath\profiles$\utc-comp_et2"
+
+$serverPath = "\\SRV-2K22-ABOUFTIL"
+#Ne pas oublier de connexter à la lettre K
+
+net user prof_jury1 /homedir:$serverPath\jury$\prof_jury1
+net user prof_jury2 /homedir:$serverPath\jury$\prof_jury2
+net user prof_jury3 /homedir:$serverPath\jury$\prof_jury3
+net user prof_insa-cvl /homedir:$serverPath\profs_ecoles$\prof_insa-cvl
+net user prof_insa-lyon /homedir:$serverPath\profs_ecoles$\prof_insa-lyon
+net user prof_supelec-paris /homedir:$serverPath\profs_ecoles$\prof_supelec-paris
+net user prof_utc-comp /homedir:$serverPath\profs_ecoles$\prof_utc-comp
+net user insa-cvl_et1 /homedir:$serverPath\insa-cvl$\insa-cvl_et1
+net user insa-cvl_et2 /homedir:$serverPath\insa-cvl$\insa-cvl_et2
+net user insa-lyon_et1 /homedir:$serverPath\insa-lyon$\insa-lyon_et1
+net user insa-lyon_et2 /homedir:$serverPath\insa-lyon$\insa-lyon_et2
+net user supelec-paris_et1 /homedir:$serverPath\supelec-paris$\supelec-paris_et1
+net user supelec-paris_et2 /homedir:$serverPath\supelec-paris$\supelec-paris_et2
+net user utc-comp_et1 /homedir:$serverPath\utc-comp$\utc-comp_et1
+net user utc-comp_et2 /homedir:$serverPath\utc-comp$\utc-comp_et2
+
+
+# Liste des chemins de fichiers
+$paths = @(
+    "H:\",
+    "F:\",
+    "I:\",
+    "F:\profiles",
+    "H:\commun",
+    "H:\prof_jury1",
+    "H:\prof_jury2",
+    "H:\prof_jury3",
+    "I:\profs_ecoles",
+    "I:\insa-cvl",
+    "I:\insa-cvl\commun",
+    "I:\insa-cvl\insa-cvl_et1",
+    "I:\insa-cvl\insa-cvl_et2",
+    "I:\insa-lyon",
+    "I:\insa-lyon\commun",
+    "I:\insa-lyon\insa-lyon_et1",
+    "I:\insa-lyon\insa-lyon_et2",
+    "I:\supelec-paris",
+    "I:\supelec-paris\commun",
+    "I:\supelec-paris\supelec-paris_et1",
+    "I:\supelec-paris\supelec-paris_et2",
+    "I:\utc-comp",
+    "I:\utc-comp\commun",
+    "I:\utc-comp\utc-comp_et1",
+    "I:\utc-comp\utc-comp_et2"
+)
+
+foreach ($path in $paths) {
+    # Désactivez l'héritage et convertissez toutes les autorisations héritées en autorisations explicites
+    icacls $path /inheritance:d
+
+    # Obtenez la liste des utilisateurs et des groupes qui ont des autorisations sur l'objet
+    $acl = Get-Acl -Path $path
+
+    foreach ($access in $acl.Access) {
+        # Si l'utilisateur ou le groupe n'est pas le "CREATEUR PROPRIETAIRE" ou le "Système", supprimez ses autorisations
+        if ($access.IdentityReference -ne 'CREATEUR PROPRIETAIRE' -and $access.IdentityReference -notlike '*Système*') {
+            icacls $path /remove:g $access.IdentityReference
+        }
+    }
+
+    icacls $path /remove:g "BUILTIN\Administrateurs"
+}
+
+$commands = @(
+    @{
+        Path = "F:\"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "Utilisateurs du domaine"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "F:\profiles"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "Utilisateurs du domaine"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "jury"; Access = "ReadAndExecute" },
+            @{ User = "profs_ecoles"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "H:\"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "jury"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "H:\commun"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "jury"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "H:\prof_jury1"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_jury1"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "H:\prof_jury2"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_jury2"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "H:\prof_jury3"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_jury3"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\profs_ecoles"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "jury"; Access = "Modify" },
+            @{ User = "profs_ecoles"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\insa-cvl"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_insa-cvl"; Access = "Modify" },
+            @{ User = "insa-cvl"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\insa-cvl\commun"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_insa-cvl"; Access = "Modify" },
+            @{ User = "insa-cvl"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\insa-cvl\insa-cvl_et1"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "insa-cvl_et1"; Access = "Modify" },
+            @{ User = "prof_insa-cvl"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\insa-cvl\insa-cvl_et2"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "insa-cvl_et2"; Access = "Modify" },
+            @{ User = "prof_insa-cvl"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\insa-lyon"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_insa-lyon"; Access = "Modify" },
+            @{ User = "insa-lyon"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\insa-lyon\commun"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_insa-lyon"; Access = "Modify" },
+            @{ User = "insa-lyon"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\insa-lyon\insa-lyon_et1"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "insa-lyon_et1"; Access = "Modify" },
+            @{ User = "prof_insa-lyon"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\insa-lyon\insa-lyon_et2"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "insa-lyon_et2"; Access = "Modify" },
+            @{ User = "prof_insa-lyon"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\supelec-paris"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_supelec-paris"; Access = "Modify" },
+            @{ User = "supelec-paris"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\supelec-paris\commun"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_supelec-paris"; Access = "Modify" },
+            @{ User = "supelec-paris"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\supelec-paris\supelec-paris_et1"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "supelec-paris_et1"; Access = "Modify" },
+            @{ User = "prof_supelec-paris"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\supelec-paris\supelec-paris_et2"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "supelec-paris_et2"; Access = "Modify" },
+            @{ User = "prof_supelec-paris"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\utc-comp"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_utc-comp"; Access = "Modify" },
+            @{ User = "utc-comp"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\utc-comp\commun"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "prof_utc-comp"; Access = "Modify" },
+            @{ User = "utc-comp"; Access = "ReadAndExecute" }
+        )
+    },
+    @{
+        Path = "I:\utc-comp\utc-comp_et1"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "utc-comp_et1"; Access = "Modify" },
+            @{ User = "prof_utc-comp"; Access = "Modify" }
+        )
+    },
+    @{
+        Path = "I:\utc-comp\utc-comp_et2"
+        Permissions = @(
+            @{ User = "Administrateurs"; Access = "FullControl" },
+            @{ User = "utc-comp_et2"; Access = "Modify" },
+            @{ User = "prof_utc-comp"; Access = "Modify" }
+        )
+    }
+)
+
+foreach ($command in $commands) {
+    $acl = Get-Acl -Path $command.Path
+
+    foreach ($permission in $command.Permissions) {
+        $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($permission.User, $permission.Access, "ContainerInherit, ObjectInherit", "None", "Allow")
+        $acl.SetAccessRule($accessRule)
+    }
+
+    Set-Acl -Path $command.Path -AclObject $acl
+}
+
+
+# Liste des scripts à créer
+$servername="ABOUFTIL"
+$scripts = @(
+    @{
+        Name = 'insa-cvl.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\insa-cvl$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_insa-cvl$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'insa-lyon.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\insa-lyon$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_insa-lyon$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'supelec-paris.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\supelec-paris$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_supelec-paris$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'utc-comp.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\utc-comp$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_utc-comp$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'prof_insa-cvl.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\prof_insa-cvl$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_insa-cvl$ /persistent:no
+net use m: \\SRV-2K22-$servername\insa-cvl$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'prof_insa-lyon.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\prof_insa-lyon$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_insa-lyon$ /persistent:no
+net use m: \\SRV-2K22-$servername\insa-lyon$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'prof_supelec-paris.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\prof_supelec-paris$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_supelec-paris$ /persistent:no
+net use m: \\SRV-2K22-$servername\supelec-paris$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'prof_utc-comp.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\prof_utc-comp$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_utc-comp$ /persistent:no
+net use m: \\SRV-2K22-$servername\utc-comp$ /persistent:no
+pause
+"@
+    },
+    @{
+        Name = 'jury.bat'
+        Content = @"
+net time /set /domain:cfr-$servername /y
+net use k: \\SRV-2K22-$servername\jury$ /persistent:no
+net use l: \\SRV-2K22-$servername\commun_jury$ /persistent:no
+net use m: \\SRV-2K22-$servername\profs_ecoles$ /persistent:no
+pause
+"@
+    }
+)
+
+New-Item -ItemType Directory -Path "C:\Windows\SYSVOL\sysvol\scripts"
+# Chemin du répertoire des scripts
+$scriptPath = 'C:\Windows\SYSVOL\sysvol\scripts'
+
+# Création des scripts
+foreach ($script in $scripts) {
+    $filePath = Join-Path -Path $scriptPath -ChildPath $script.Name
+    Set-Content -Path $filePath -Value $script.Content
+}
+
+
+# Définir le chemin vers les scripts
+$scriptPath = "C:\Windows\SYSVOL\sysvol\scripts\"
+
+# Définir les utilisateurs et leurs scripts
+$usersAndScripts = @{
+    "prof_jury1" = "jury.bat"
+    "prof_jury2" = "jury.bat"
+    "prof_jury3" = "jury.bat"
+    "prof_insa-cvl" = "prof_insa-cvl.bat"
+    "insa-cvl_et1" = "insa-cvl.bat"
+    "insa-cvl_et2" = "insa-cvl.bat"
+    "prof_insa-lyon" = "prof_insa-lyon.bat"
+    "insa-lyon_et1" = "insa-lyon.bat"
+    "insa-lyon_et2" = "insa-lyon.bat"
+    "prof_supelec-paris" = "prof_supelec-paris.bat"
+    "supelec-paris_et1" = "supelec-paris.bat"
+    "supelec-paris_et2" = "supelec-paris.bat"
+    "prof_utc-comp" = "prof_utc-comp.bat"
+    "utc-comp_et1" = "utc-comp.bat"
+    "utc-comp_et2" = "utc-comp.bat"
+}
+
+# Parcourir chaque utilisateur et attribuer le script correspondant
+foreach ($user in $usersAndScripts.Keys) {
+    $script = $usersAndScripts[$user]
+    Set-ADUser -Identity $user -ScriptPath ($script)
+}
