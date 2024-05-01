@@ -1,4 +1,4 @@
-# Windows Server 2022
+# Active Directory Windows Server 2022
 
 Dans le cadre de ce TP, nous avons mis en pratique les éléments de théorie vus en cours en mettant en place un serveur Windows 2022 pour la gestion en réseau des ressources informatiques de la Coupe de France de Robotique. Notre mission était de créer un environnement réseau pour connecter les participants de chaque école et gérer les ressources informatiques.
 
@@ -429,6 +429,7 @@ Vous devez au moins faire manuellement `prof_jury2` et `insa-cvl_et1`.
 
 7. Nous allons maintenant définir le profil d’environnement de l’utilisateur. Pour cela, Partageons les répertoires suivants :
 
+<div align="center">
 | Répertoire      | Nom de partage   |
 |-----------------|------------------|
 | profiles        | profiles$        |
@@ -438,6 +439,7 @@ Vous devez au moins faire manuellement `prof_jury2` et `insa-cvl_et1`.
 | insa-lyon       | insa-lyon$       |
 | supelec-paris   | supelec-paris$   |
 | utc-comp        | utc-comp$        |
+</div>
 
 Prenons un exemple :
 Nous souhaitons partager le repertoire jury. Clic droit sur le repertoire puis `Propriétés`>`Partage`>`Partage avancé`.  
